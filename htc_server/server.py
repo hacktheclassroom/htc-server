@@ -2,23 +2,27 @@
 
 """htc-server"""
 
-import json
+import simplejson
 
 from sanic import Sanic
 from sanic import response
 
+from common import HTCServerInvalidPayload
+
 app = Sanic()
 
 
-@app.route('/<foo>')
-async def lookup(request, foo):
-    data = {'foo': foo}
-    return response.text(data)
+@app.route('/solve', methods=['POST'])
+async def solve(request):
+    try:
+        level_id = request.json['level_id']
+        flag = request.json['flag']
+    except KeyError:
+        raise HTCServerInvalidPayload
 
+    # check Level ID and Flag here :)
 
-#@app.route("/", methods=['POST',])
-#async def post_handler(request):
-#    pass
+    return response.json({'success': True})
 
 
 if __name__ == '__main__':
