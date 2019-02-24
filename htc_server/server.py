@@ -27,7 +27,7 @@ def validate_server_code(server_code):
     if len(server_code) != 6:
         return response.json({'success': False})
 
-    result = list(u2r.where('rid', ''=='', server_code).get())
+    result = list(u2r.where('rid', '==', server_code).get())
     if result:
         # uid = result[0].get('uid')
         return response.json({"success": True})
