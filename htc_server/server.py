@@ -23,6 +23,22 @@ u2r = firestore.client().collection("uid_to_rid")
 l2f = firestore.client().collection("level_to_flag")
 
 
+def get_highscores(server_code):
+    """
+    Get top 5 highscores in format fit for the chart
+    """
+    room = list(u2r.where('rid', '==', server_code).get())
+    labels = []
+    data = []
+    if room:
+        raw_data = []
+        for user in list(u2r.document(room[0].id).collection("users").get()):
+            raw_data.append((score_flags(user.get("flags")), user.get("username")))
+
+        data, labels = zip(*sorted(raw_data, reverse=True)[:5])
+    return response.json({"labels": labels, "data": data})
+
+
 def validate_user(username, server_code):
     """
     Validate username, if the user exists in the db,
@@ -94,7 +110,7 @@ def score_flags(flags):
             if level:
                 level = level[0]
                 if flag_id in level.get("flags"):
-                   score += score + level.get("flags").get(flag_id, 0)
+                   score += level.get("flags").get(flag_id, 0)
     return score
 
 
@@ -108,6 +124,19 @@ def score_lookup(username, server_code):
                 score = score_flags(user.get("flags"))
                 break
     return response.json({"score": score})
+
+
+@app.route('/highscores', methods=['GET', ])
+async def highscores(request):
+    """
+    Get top 5 high scores given a server code
+    """
+    try:
+        server_code = request.json['server_code']
+    except KeyError:
+        raise HTCServerInvalidPayload
+
+    return get_highscores(server_code)
 
 
 @app.route('/validate', methods=['GET', ])
