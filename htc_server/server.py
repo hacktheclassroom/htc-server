@@ -126,17 +126,19 @@ def score_lookup(username, server_code):
     return response.json({"score": score})
 
 
-@app.route('/highscores', methods=['GET', ])
-async def highscores(request):
+@app.route('/highscores/<server_code>', methods=['GET', ])
+async def highscores(request, server_code):
     """
     Get top 5 high scores given a server code
     """
-    try:
-        server_code = request.json['server_code']
-    except KeyError:
-        raise HTCServerInvalidPayload
+    # try:
+        # server_code = request.json['server_code']
+    # except KeyError:
+    #     raise HTCServerInvalidPayload
 
-    return get_highscores(server_code)
+    r = get_highscores(server_code)
+    r.headers.extend({"Access-Control-Allow-Origin": "* "})
+    return r
 
 
 @app.route('/validate', methods=['GET', ])
