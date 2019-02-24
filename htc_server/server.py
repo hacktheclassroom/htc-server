@@ -23,6 +23,16 @@ u2r = firestore.client().collection("uid_to_rid")
 l2f = firestore.client().collection("level_to_flag")
 
 
+def validate_user(username, server_code):
+    """
+    Validate username, if the user exists in the db,
+    otherwise create it
+    """
+    room = list(u2r.where('rid', '==', server_code).get())
+    if room:
+        u2r.document(room[0].id).collection("users").add({"username": username, "flags": []})
+
+
 def validate_server_code(server_code):
     if len(server_code) != 6:
         return response.json({'success': False})
@@ -111,7 +121,10 @@ async def validate(request):
 
 @app.route('/solve', methods=['GET', ])
 async def solve(request):
-    """Attempt to solve a puzzle."""
+    """
+    Attempt to solve a puzzle.
+    if the user doesn't exist, create it
+    """
 
     try:
         level_id = request.json['level_id']
@@ -122,6 +135,7 @@ async def solve(request):
     except KeyError:
         raise HTCServerInvalidPayload
 
+    validate_user(username, server_code)
     return solve_check(username, server_code, level_id, flag)
 
 
