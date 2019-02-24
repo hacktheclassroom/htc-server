@@ -30,7 +30,9 @@ def validate_user(username, server_code):
     """
     room = list(u2r.where('rid', '==', server_code).get())
     if room:
-        u2r.document(room[0].id).collection("users").add({"username": username, "flags": []})
+        user = list(u2r.document(room[0].id).collection("users").where('username', '==', username).get())
+        if not user:
+            u2r.document(room[0].id).collection("users").add({"username": username, "flags": []})
 
 
 def validate_server_code(server_code):
@@ -67,11 +69,8 @@ def solve_check(username, server_code, level_id, flag):
     correct_flag = False
     if level:
         flags = level[0].get("flags")
-        if flag.startswith(level_id + "."):
-            flag = flag.split(".")[1]
-
         if flag in flags:
-            correct_flag = add_flag_to_user(username, server_code, flag)
+            correct_flag = add_flag_to_user(username, server_code, "{}.{}".format(level_id, flag))
     return response.json({"success": correct_flag})
 
 
