@@ -1,4 +1,4 @@
-"""htc_api.util"""
+"""htc_api.common"""
 
 
 class HTCServerInvalidPayload(Exception):

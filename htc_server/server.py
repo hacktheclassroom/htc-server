@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-"""htc-server"""
+"""htc_server.server"""
 
 import simplejson
+import firebase_admin
 
 from sanic import Sanic
 from sanic import response
-import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 from google.cloud.firestore_v1beta1 import ArrayUnion
