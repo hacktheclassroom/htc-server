@@ -6,15 +6,29 @@ import simplejson
 
 from sanic import Sanic
 from sanic import response
-
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 from common import HTCServerInvalidPayload
 
 app = Sanic()
+firebase = firebase_admin.initialize_app(credentials.Certificate("hacktheclassroom.firebase.json"), {
+    'databaseURL': "https://hacktheclassroom-34a66.firebaseio.com"
+})
+# User id to room id collection object
+u2r = firestore.client().collection("uid_to_rid")
 
 
 def validate_server_code(server_code):
-    """Validate the server code."""
-    raise NotImplementedError
+    if len(server_code) != 6:
+        return response.json({'success': False})
+
+    result = list(u2r.where('rid', "==", server_code).get())
+    if result:
+        # uid = result[0].get('uid')
+        return response.json({"success": True})
+    else:
+        return response.json({'success': False})
 
 
 def solve_check(level_id, flag):
@@ -30,16 +44,12 @@ def score_lookup(username):
 @app.route('/validate', methods=['GET', ])
 async def validate(request):
     """Validate server code."""
-
     try:
         server_code = request.json['server_code']
     except KeyError:
         raise HTCServerInvalidPayload
 
-    # TODO: validate server code
-    # validate_server_code(server_code)
-
-    return response.json({'success': True})
+    return validate_server_code(server_code)
 
 
 @app.route('/solve', methods=['GET', ])

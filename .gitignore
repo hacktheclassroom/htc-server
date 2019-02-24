@@ -1,2 +1,3 @@
 *.pyc
 stage/
+*.firebase.json
